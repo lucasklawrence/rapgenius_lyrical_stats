@@ -125,7 +125,7 @@ class Song:
 
     def set_word_count_from_lyrics(self):
         if self.lyrics is None:
-            raise ValueError("Lyrics for this song is currently None")
+            return
 
         words = self.lyrics.lower().split()
         for word in words:
