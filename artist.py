@@ -5,6 +5,7 @@ class Artist:
         self.artist_url = artist_url
         self.albums = list()
         self.wordCount = {}
+        self.wordCloud = None
 
     def get_artist_name(self):
         return self.artist_name
@@ -39,12 +40,20 @@ class Artist:
                     previous_count = self.wordCount[key]
                     self.wordCount[key] = previous_count + album.wordCount[key]
 
+    def get_word_cloud(self):
+        return self.wordCloud
+
+    def set_word_cloud(self, wordcloud):
+        self.wordCloud = wordcloud
+
+
 class Album:
     def __init__(self, album_name, album_url):
         self.album_name = album_name
         self.album_url = album_url
         self.songs = list()
         self.wordCount = {}
+        self.wordCloud = None
 
     def get_album_name(self):
         return self.album_name
@@ -79,6 +88,11 @@ class Album:
                     previous_count = self.wordCount[key]
                     self.wordCount[key] = previous_count + song.wordCount[key]
 
+    def get_word_cloud(self):
+        return self.wordCloud
+
+    def set_word_cloud(self, wordcloud):
+        self.wordCloud = wordcloud
 
 
 class Song:
