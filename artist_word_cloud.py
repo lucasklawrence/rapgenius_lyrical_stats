@@ -1,15 +1,20 @@
-from rauth import OAuth2Service
-import http
+# web imports
 import requests
-from http import HTTPStatus
 from bs4 import BeautifulSoup
+
+# regular expression and string to find lyrics / parts of lyrics
 import re
-from artist import Artist, Album, Song
 import string
 
-import wordcloud
+# import classes
+from artist import Artist, Album, Song
+
+# wordcloud and plot wordcloud
+from wordcloud import WordCloud
 import matplotlib.pyplot as plt
-from collections import Counter
+
+# datetime to print time for each album
+import datetime as datetime
 
 
 def find_artist_url(search_artist):
@@ -138,6 +143,8 @@ def add_songs_to_artist_albums(artist):
     # create songs for album
     for album_iter in eminem.get_albums():
         song_urls = get_song_urls_from_album_url(album_iter.get_album_url())
+        print("Scraping lyrics for album: " + album_iter.get_album_name())
+        initial_time = datetime.datetime.now()
         for song_url in song_urls:
             song_title = (str.partition(song_url, "genius.com/"))[2]
             current_song = Song(song_title, song_url)
@@ -145,7 +152,33 @@ def add_songs_to_artist_albums(artist):
             current_song.set_word_count_from_lyrics()
             album_iter.add_song(current_song)
         album_iter.set_word_count_from_songs()
+        end_time = datetime.datetime.now()
+        elapsed_time = (end_time - initial_time).total_seconds()
+        print("Finished in: " + str(elapsed_time) + " seconds")
     artist.set_word_count_from_albums()
+
+
+def initialize_albums_and_songs(artist):
+    add_albums_to_artist(artist)
+    add_songs_to_artist_albums(artist)
+
+
+def create_word_clouds_for_artist(artist):
+
+    # set overall word cloud for artist
+    if artist.get_word_count() is None:
+        print("not initialize")
+
+    if artist.get_word_count() is not None:
+        artist_word_cloud = WordCloud().generate_from_frequencies(artist.get_word_count())
+        artist.set_word_cloud(artist_word_cloud)
+
+    # set word clouds for each album
+
+    for artist_album in artist.get_albums():
+        album_word_count = artist_album.get_word_count()
+        album_word_cloud = WordCloud().generate_from_frequencies(album_word_count)
+        artist_album.set_word_cloud(album_word_cloud)
 
 
 if __name__ == '__main__':
@@ -154,12 +187,12 @@ if __name__ == '__main__':
     artist_url = artist_urls.pop()
     eminem = Artist(search_for, artist_url)
 
-    add_albums_to_artist(eminem)
-    add_songs_to_artist_albums(eminem)
+    initialize_albums_and_songs(eminem)
+    create_word_clouds_for_artist(eminem)
 
-    artist_word_cloud = wordcloud.WordCloud().generate_from_frequencies(eminem.get_word_count())
+
     # Display the generated image:
-    plt.imshow(artist_word_cloud, interpolation='bilinear')
+    plt.imshow(eminem.get_word_cloud(), interpolation='bilinear')
     plt.axis("off")
     plt.show()
 
