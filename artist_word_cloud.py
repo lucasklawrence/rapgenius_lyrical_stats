@@ -132,11 +132,11 @@ def add_albums_to_artist(artist):
 
     # create albums for artist
     for genius_album_url in genius_album_urls:
-        init_partition = str.partition(genius_album_url, artist.get_artist_name().lower())
+        init_partition = str.partition(genius_album_url, "/albums/")
         album_name = (str.partition(init_partition[2], "/"))[2]
         album_name = str.replace(album_name, "-", " ")
-        album = Album(album_name, genius_album_url)
-        artist.add_album(album)
+        genius_album = Album(album_name, genius_album_url)
+        artist.add_album(genius_album)
 
 
 def add_songs_to_artist_albums(artist):
