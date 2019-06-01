@@ -102,11 +102,11 @@ def remove_items_in_brackets(lyrics):
     end_indices = list()
 
     # get starting and ending points of brackets in string
-    for i in range(len(lyrics)):
-        if lyrics[i] == '[':
-            initial_indices.append(i)
-        if lyrics[i] == ']':
-            end_indices.append(i)
+    for index in range(len(lyrics)):
+        if lyrics[index] == '[':
+            initial_indices.append(index)
+        if lyrics[index] == ']':
+            end_indices.append(index)
 
     initial_length = len(initial_indices)
     end_length = len(end_indices)
@@ -114,9 +114,9 @@ def remove_items_in_brackets(lyrics):
 
     # get strings that are in brackets to replace with empty strings
     if initial_length == end_length:
-        for i in range(initial_length):
-            initial_index = initial_indices[i]
-            end_index = end_indices[i]
+        for index in range(initial_length):
+            initial_index = initial_indices[index]
+            end_index = end_indices[index]
             remove.append(lyrics[initial_index:end_index + 1])
 
     # replace strings w/ empty string
@@ -182,51 +182,61 @@ def create_word_clouds_for_artist(artist):
 
 
 if __name__ == '__main__':
-    search_for = input("Enter an artist to search for on rap genius: ")
-    artist_urls = find_artist_url(search_for)
-    choice = 1
-    for url in artist_urls:
-        print(str(choice) + ": " + url)
-        choice = choice + 1
-
-    choice = input("Select the correct rap genius url for the artist: ")
-    choice_number = int(choice)
-    artist_url = None
-    for i in range(choice_number):
-        artist_url = artist_urls.pop()
-    rap_genius_artist = Artist(search_for, artist_url)
-
-    initialize_albums_and_songs(rap_genius_artist)
-    create_word_clouds_for_artist(rap_genius_artist)
-
-    # print out choices and ask user to select which word cloud to present
-    print("A: " + rap_genius_artist.get_artist_name() + " Word Cloud")
-    choice = 1
-    for album in rap_genius_artist.get_albums():
-        print(str(choice) + ": Album \"" + album.get_album_name() + "\" word cloud")
-        choice = choice + 1
-
-    print(str(choice) + ": End program")
-    next_choice = None
-    choice_number = 0
 
     while True:
-        next_choice = input("Select a Word Cloud to display: ")
-        if next_choice == 'A':
-            plt.imshow(rap_genius_artist.get_word_cloud(), interpolation='bilinear')
-            plt.title(rap_genius_artist.get_artist_name())
-            plt.axis("off")
-            plt.show()
-        else:
-            choice_number = int(next_choice)
-            if choice_number == choice:
-                break
-            i = 1
+        search_for = input("Enter an artist to search for on rap genius: ")
+        artist_urls = find_artist_url(search_for)
+        choice = 1
+        for url in artist_urls:
+            print(str(choice) + ": " + url)
+            choice = choice + 1
+
+        choice = input("Select the correct rap genius url for the artist: ")
+        choice_number = int(choice)
+        artist_url = None
+        for i in range(choice_number):
+            artist_url = artist_urls.pop()
+        if artist_url is not None:
+            artist_name = str.partition(artist_url, "/artists/")[2]
+            rap_genius_artist = Artist(artist_name, artist_url)
+
+            initialize_albums_and_songs(rap_genius_artist)
+            create_word_clouds_for_artist(rap_genius_artist)
+
+            # print out choices and ask user to select which word cloud to present
+            print("A: " + rap_genius_artist.get_artist_name() + " Word Cloud")
+            choice = 1
             for album in rap_genius_artist.get_albums():
-                if choice_number == i:
+                print(str(choice) + ": Album \"" + album.get_album_name() + "\" word cloud")
+                choice = choice + 1
+
+            new_artist_choice = choice
+            print(str(choice) + ": Search for new artist")
+            end_choice = choice + 1
+            print(str(end_choice) + ": End program")
+            next_choice = None
+            choice_number = 0
+
+            while True:
+                next_choice = input("Select a Word Cloud to display: ")
+                if next_choice == 'A':
                     plt.imshow(rap_genius_artist.get_word_cloud(), interpolation='bilinear')
-                    plt.title(album.get_album_name())
+                    plt.title(rap_genius_artist.get_artist_name())
                     plt.axis("off")
                     plt.show()
-                i = i+1
+                else:
+                    choice_number = int(next_choice)
+                    if choice_number == new_artist_choice or choice_number == end_choice:
+                        break
+                    i = 1
+                    for album in rap_genius_artist.get_albums():
+                        if choice_number == i:
+                            plt.imshow(album.get_word_cloud(), interpolation='bilinear')
+                            plt.title(album.get_album_name())
+                            plt.axis("off")
+                            plt.show()
+                        i = i+1
+            if choice_number == end_choice:
+                break
+
 
