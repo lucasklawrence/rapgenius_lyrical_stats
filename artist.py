@@ -9,6 +9,8 @@ import string
 # datetime to print time for each album
 import datetime as datetime
 
+import multiprocessing as mp
+
 
 class Stats:
     def __init__(self, word_count):
@@ -41,13 +43,14 @@ class Stats:
 
     def init_starting_letter_count(self):
         starting_letter_count = {}
-        for key in self.word_count:
-            letter = key[0]
-            if letter not in starting_letter_count:
-                starting_letter_count[letter] = 1
-            else:
-                prev_count = starting_letter_count[letter]
-                starting_letter_count[letter] = prev_count + 1
+        if self.word_count is not None and len(self.word_count) != 0:
+            for key in self.word_count:
+                letter = key[0]
+                if letter not in starting_letter_count:
+                    starting_letter_count[letter] = 1
+                else:
+                    prev_count = starting_letter_count[letter]
+                    starting_letter_count[letter] = prev_count + 1
 
         return starting_letter_count
 
@@ -59,9 +62,10 @@ class Stats:
 
     def init_word_count_minus(self):
         word_count_minus = {}
-        for key in self.word_count:
-            if key not in self.remove:
-                word_count_minus[key] = self.word_count[key]
+        if self.word_count is not None and len(self.word_count) != 0:
+            for key in self.word_count:
+                if key not in self.remove:
+                    word_count_minus[key] = self.word_count[key]
 
         return word_count_minus
 
@@ -177,7 +181,7 @@ class Album:
         self.album_url = album_url
 
         # initialize songs
-        self.songs = list()
+        self.songs = mp.Manager().list()
         self.init_songs()
 
         self.stats = self.init_stats()
@@ -205,14 +209,27 @@ class Album:
         # create songs for album
         song_urls = get_song_urls_from_album_url(self.get_album_url())
         print("Scraping lyrics for album: " + self.get_album_name())
+
+        # Init multiprocessing.Pool()
+        pool = mp.Pool(mp.cpu_count())
+
         initial_time = datetime.datetime.now()
-        for song_url in song_urls:
-            song_title = (str.partition(song_url, "genius.com/"))[2]
-            current_song = Song(song_title, song_url)
-            self.add_song(current_song)
+
+        # below is equivalent of
+        # for song_url in song_urls:
+        #   self.create_song(song_url)
+        # but using parallel processing
+        [pool.map(self.create_song, [song_url for song_url in song_urls])]
+        pool.close()
+
         end_time = datetime.datetime.now()
         elapsed_time = (end_time - initial_time).total_seconds()
         print("Finished in: " + str(elapsed_time) + " seconds")
+
+    def create_song(self, song_url):
+        song_title = (str.partition(song_url, "genius.com/"))[2]
+        current_song = Song(song_title, song_url)
+        self.add_song(current_song)
 
     def add_song(self, song):
         self.songs.append(song)
