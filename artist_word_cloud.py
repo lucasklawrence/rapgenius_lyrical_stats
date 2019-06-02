@@ -190,11 +190,18 @@ if __name__ == '__main__':
         for url in artist_urls:
             print(str(choice) + ": " + url)
             choice = choice + 1
+        new_search_choice = choice
+        print(str(new_search_choice) + ": Search for new artist")
 
-        choice = input("Select the correct rap genius url for the artist: ")
-        choice_number = int(choice)
+        choice_input = input("Select the correct rap genius url for the artist: ")
+        while not str.isdigit(choice_input) or int(choice_input) > choice:
+            print("Input was not one of the valid choices")
+            choice_input = input("Select the correct rap genius url for the artist: ")
+
+        if int(choice_input) == new_search_choice:
+            continue
         artist_url = None
-        for i in range(choice_number):
+        for i in range(int(choice_input)):
             artist_url = artist_urls.pop()
         if artist_url is not None:
             artist_name = str.partition(artist_url, "/artists/")[2]
@@ -219,6 +226,10 @@ if __name__ == '__main__':
 
             while True:
                 next_choice = input("Select a Word Cloud to display: ")
+                while next_choice != 'A' and (not str.isdigit(next_choice) or int(next_choice) > end_choice):
+                    print("Input was not one of the valid choices")
+                    next_choice = input("Select a Word Cloud to display: ")
+
                 if next_choice == 'A':
                     plt.imshow(rap_genius_artist.get_word_cloud(), interpolation='bilinear')
                     plt.title(rap_genius_artist.get_artist_name())
