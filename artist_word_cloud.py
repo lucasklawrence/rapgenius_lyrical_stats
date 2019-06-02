@@ -55,7 +55,7 @@ def get_artist_albums_from_artist_url(artist_link):
     album_urls = set()
     for link in soup.find_all('a'):
         possible_link = link.get('href')
-        if re.match('https://', possible_link) and re.search('albums', possible_link):
+        if re.match('https://', possible_link) and re.search('/albums/', possible_link):
             if possible_link.lower() not in album_urls:
                 album_urls.add(possible_link.lower())
 
@@ -70,9 +70,8 @@ def get_song_urls_from_album_url(album_link):
     song_genius_urls = set()
     for link in soup.find_all('a'):
         possible_link = link.get('href')
-
         # this gets all possible songs from the album
-        if re.search("-lyrics", possible_link):
+        if possible_link is not None and re.search("-lyrics", possible_link):
             song_genius_url = possible_link.lower()
             if song_genius_url not in song_genius_urls:
                 song_genius_urls.add(song_genius_url)
@@ -152,10 +151,12 @@ def add_songs_to_artist_albums(artist):
             current_song.set_word_count_from_lyrics()
             album_iter.add_song(current_song)
         album_iter.set_word_count_from_songs()
+        album_iter.set_starting_letter_count_from_word_count()
         end_time = datetime.datetime.now()
         elapsed_time = (end_time - initial_time).total_seconds()
         print("Finished in: " + str(elapsed_time) + " seconds")
     artist.set_word_count_from_albums()
+    artist.set_starting_letter_count_from_word_count()
 
 
 def initialize_albums_and_songs(artist):
@@ -165,20 +166,19 @@ def initialize_albums_and_songs(artist):
 
 def create_word_clouds_for_artist(artist):
 
-    # set overall word cloud for artist
-    if artist.get_word_count() is None:
-        print("not initialize")
+    artist_word_count = artist.get_word_count()
+    artist_starting_letter_count = artist.get_starting_letter_count()
 
-    if artist.get_word_count() is not None:
-        artist_word_cloud = WordCloud().generate_from_frequencies(artist.get_word_count())
+    if len(artist_word_count) != 0:
+        artist_word_cloud = WordCloud().generate_from_frequencies(artist_word_count)
         artist.set_word_cloud(artist_word_cloud)
 
     # set word clouds for each album
-
     for artist_album in artist.get_albums():
         album_word_count = artist_album.get_word_count()
-        album_word_cloud = WordCloud().generate_from_frequencies(album_word_count)
-        artist_album.set_word_cloud(album_word_cloud)
+        if len(album_word_count) != 0:
+            album_word_cloud = WordCloud().generate_from_frequencies(album_word_count)
+            artist_album.set_word_cloud(album_word_cloud)
 
 
 if __name__ == '__main__':
@@ -209,7 +209,6 @@ if __name__ == '__main__':
 
             initialize_albums_and_songs(rap_genius_artist)
             create_word_clouds_for_artist(rap_genius_artist)
-
             # print out choices and ask user to select which word cloud to present
             print("A: " + rap_genius_artist.get_artist_name() + " Word Cloud")
             choice = 1
