@@ -31,6 +31,7 @@ class Stats:
                           "at", "in", "by", "for", "on", "to", "from", "of", "with"}
 
         self.word_count_minus = self.init_word_count_minus()
+        self.starting_letter_count_minus = self.init_starting_letter_count_minus()
 
     def get_word_count(self):
         return self.word_count
@@ -63,6 +64,21 @@ class Stats:
                 word_count_minus[key] = self.word_count[key]
 
         return word_count_minus
+
+    def get_starting_letter_count_minus(self):
+        return self.starting_letter_count_minus
+
+    def init_starting_letter_count_minus(self):
+        starting_letter_count = {}
+        for key in self.word_count_minus:
+            letter = key[0]
+            if letter not in starting_letter_count:
+                starting_letter_count[letter] = 1
+            else:
+                prev_count = starting_letter_count[letter]
+                starting_letter_count[letter] = prev_count + 1
+
+        return starting_letter_count
 
 
 class Artist:
@@ -98,6 +114,7 @@ class Artist:
     def get_albums(self):
         return self.albums
 
+    # initialize the artist albums from the artist url
     def init_albums(self):
         # Get Albums from Artist
         genius_album_urls = get_artist_albums_from_artist_url(self.get_artist_url())
@@ -116,6 +133,7 @@ class Artist:
     def get_stats(self):
         return self.stats
 
+    # initialize the stats from the album stats
     def init_stats(self):
         combined_words = {}
 
@@ -151,6 +169,10 @@ class Artist:
 
 class Album:
     def __init__(self, album_name, album_url):
+        """
+        :param album_name: name of album
+        :param album_url: rap genius url of album
+        """
         self.album_name = album_name
         self.album_url = album_url
 
@@ -161,8 +183,6 @@ class Album:
         self.stats = self.init_stats()
         self.wordCloud = None
 
-        # dictionary for word count with parts of speech removed
-        self.wordCountMinusPartsOfSpeech = {}
         self.wordCloudMinusPartsOfSpeech = None
 
     def get_album_name(self):
@@ -180,6 +200,7 @@ class Album:
     def get_songs(self):
         return self.songs
 
+    # initialize songs for the album from the rap genius album url
     def init_songs(self):
         # create songs for album
         song_urls = get_song_urls_from_album_url(self.get_album_url())
@@ -199,6 +220,7 @@ class Album:
     def get_stats(self):
         return self.stats
 
+    # initialize album stats from the stats of each song in the album
     def init_stats(self):
         combined_words = {}
         for song in self.get_songs():
@@ -254,6 +276,7 @@ class Song:
     def set_lyrics(self, lyrics):
         self.lyrics = lyrics
 
+    # get the lyrics for the song from the rap genius song url
     def init_lyrics(self):
         html = requests.get(self.get_song_url())
         data = html.text
@@ -280,6 +303,7 @@ class Song:
     def get_word_count(self):
         return self.wordCount
 
+    # initialize the word count from the song lyrics
     def init_word_count(self):
         word_count = {}
         if self.lyrics is None:
@@ -299,6 +323,10 @@ class Song:
 # Utilities
 
 def get_artist_albums_from_artist_url(artist_link):
+    """
+    :param artist_link: rap genius link to artist
+    :return: rap genius album urls found from the rap genius artist page
+    """
     html = requests.get(artist_link)
     data = html.text
     soup = BeautifulSoup(data, "html.parser")
@@ -314,6 +342,10 @@ def get_artist_albums_from_artist_url(artist_link):
 
 
 def get_song_urls_from_album_url(album_link):
+    """
+    :param album_link: rap genius album link
+    :return: list of rap genius song links found from the album link
+    """
     html = requests.get(album_link)
     data = html.text
     soup = BeautifulSoup(data, "html.parser")
@@ -330,24 +362,11 @@ def get_song_urls_from_album_url(album_link):
     return song_genius_urls
 
 
-def get_lyrics_from_song_url(song_link):
-    html = requests.get(song_link)
-    data = html.text
-    soup = BeautifulSoup(data, "html.parser")
-    lyrics_html = soup.find("div", {"class": "lyrics"})
-
-    song_lyrics = None
-    if lyrics_html is not None:
-        song_lyrics = lyrics_html.get_text()
-
-        # remove [Chorus: Artist 1] [Verse: Artist 2], etc
-        song_lyrics = remove_items_in_brackets(song_lyrics)
-        # removes punctuation
-        song_lyrics = song_lyrics.translate(str.maketrans('', '', string.punctuation))
-    return song_lyrics
-
-
 def remove_items_in_brackets(lyrics):
+    """
+    :param lyrics: song lyrics
+    :return: removes part of song lyrics that specify who each part of the song is by
+    """
     initial_indices = list()
     end_indices = list()
 

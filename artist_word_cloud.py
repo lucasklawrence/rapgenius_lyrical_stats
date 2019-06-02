@@ -10,6 +10,11 @@ import matplotlib.pyplot as plt
 
 
 def find_artist_url(search_artist):
+    """
+
+    :param search_artist: artist to search for
+    :return: possible rap genius artist urls from search term
+    """
     base_url = 'https://api.genius.com'
     headers = {'Authorization': 'Bearer ' + '071qS0OFRPZ8HNpnv_D8XeVCIFJLxIoc287fimUGIlAKciRrQlDkaKUIvbH15p_C'}
     search_url = base_url + '/search'
@@ -39,32 +44,12 @@ def find_artist_url(search_artist):
     return possible_artist_urls
 
 
-def remove_common_parts_of_speech(word_count):
-    new_dictionary = {}
-    remove = {"and", "im", "or",
-              # pronouns
-              "i", "me", "my", "mine", "myself",
-              "you", "your", "yours", "yourself",
-              "he", "him", "his", "himself",
-              "she", "her", "hers", "herself",
-              "it", "its", "itself",
-              "we", "us", "our", "ours", "ourselves",
-              "they", "them", "their", "theirs"
-                                         
-              # articles
-              "a", "the", "an",
-              # prepositions
-              "at", "in", "by", "for", "on", "to", "from", "of", "with"}
-
-    for key in word_count:
-        if key not in remove:
-            new_dictionary[key] = word_count[key]
-
-    return new_dictionary
-
-
 def create_word_clouds_for_artist(artist):
+    """
 
+    :param artist: artist object to create word clouds from
+    :return: sets the word clouds for the artist passed in
+    """
     artist_word_count = artist.get_stats().get_word_count()
     artist_word_count_minus = artist.get_stats().get_word_count_minus()
     if len(artist_word_count) != 0:
