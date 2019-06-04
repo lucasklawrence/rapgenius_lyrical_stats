@@ -25,7 +25,7 @@ class Stats:
                           "she", "her", "hers", "herself",
                           "it", "its", "itself",
                           "we", "us", "our", "ours", "ourselves",
-                          "they", "them", "their", "theirs"
+                          "they", "them", "their", "theirs",
         
                           # articles
                           "a", "the", "an",
@@ -34,6 +34,13 @@ class Stats:
 
         self.word_count_minus = self.init_word_count_minus()
         self.starting_letter_count_minus = self.init_starting_letter_count_minus()
+
+        # number of unique words will be length of the dictionary
+        self.unique_words = len(self.word_count)
+        self.unique_words_minus = len(self.word_count_minus)
+
+        #
+        self.ave_length_word, self.ave_length_unique_word, self.ave_length_word_minus, self.ave_length_unique_word_minus = self.init_ave_length()
 
     def get_word_count(self):
         return self.word_count
@@ -47,10 +54,10 @@ class Stats:
             for key in self.word_count:
                 letter = key[0]
                 if letter not in starting_letter_count:
-                    starting_letter_count[letter] = 1
+                    starting_letter_count[letter] = self.word_count[key]
                 else:
                     prev_count = starting_letter_count[letter]
-                    starting_letter_count[letter] = prev_count + 1
+                    starting_letter_count[letter] = prev_count + self.word_count[key]
 
         return starting_letter_count
 
@@ -77,12 +84,62 @@ class Stats:
         for key in self.word_count_minus:
             letter = key[0]
             if letter not in starting_letter_count:
-                starting_letter_count[letter] = 1
+                starting_letter_count[letter] = self.word_count_minus[key]
             else:
                 prev_count = starting_letter_count[letter]
-                starting_letter_count[letter] = prev_count + 1
+                starting_letter_count[letter] = prev_count + self.word_count_minus[key]
 
         return starting_letter_count
+
+    def get_unique_words(self):
+        return self.unique_words
+
+    def get_unique_words_minus(self):
+        return self.unique_words_minus
+
+    def init_ave_length(self):
+        length = 0
+        length_unique = 0
+        total_words = 0
+
+        ave_length = None
+        ave_length_unique = None
+        if self.word_count is not None and len(self.word_count) != 0:
+            for key in self.word_count:
+                length = length + len(key) * int(self.word_count[key])
+                length_unique = length_unique + len(key)
+                total_words = total_words + int(self.word_count[key])
+
+            ave_length = length / total_words
+            ave_length_unique = length_unique / len(self.word_count)
+
+        length_minus = 0
+        length_unique_minus = 0
+
+        ave_length_minus = None
+        ave_length_unique_minus = None
+        total_words_minus = 0
+        if self.word_count_minus is not None and len(self.word_count_minus) != 0:
+            for key in self.word_count_minus:
+                length_minus = length_minus + len(key) * int(self.word_count_minus[key])
+                length_unique_minus = length_unique_minus + len(key)
+                total_words_minus = total_words_minus + int(self.word_count_minus[key])
+            ave_length_minus = length_minus / total_words_minus
+            ave_length_unique_minus = length_unique_minus / len(self.word_count_minus)
+
+        return ave_length, ave_length_unique, ave_length_minus, ave_length_unique_minus
+
+    def get_ave_length_word(self):
+        return self.ave_length_word
+
+    def get_ave_length_unique_word(self):
+        return self.ave_length_unique_word
+
+    def get_ave_length_word_minus(self):
+        return self.ave_length_word_minus
+
+    def get_ave_length_unique_word_minus(self):
+        return self.ave_length_unique_word_minus
 
 
 class Artist:
