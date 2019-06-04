@@ -19,7 +19,13 @@ def find_artist_url(search_artist):
     headers = {'Authorization': 'Bearer ' + '071qS0OFRPZ8HNpnv_D8XeVCIFJLxIoc287fimUGIlAKciRrQlDkaKUIvbH15p_C'}
     search_url = base_url + '/search'
     data = {'q': search_artist}
-    response = requests.get(search_url, data=data, headers=headers)
+
+    # add try statement here
+    try:
+        response = requests.get(search_url, data=data, headers=headers)
+    except requests.exceptions.RequestException as e:
+        print(e)
+        exit()
 
     json = response.json()
     meta = json['meta']
@@ -51,6 +57,7 @@ def create_word_clouds_for_artist(artist):
     :return: sets the word clouds for the artist passed in
     """
     artist_word_count = artist.get_stats().get_word_count()
+
     artist_word_count_minus = artist.get_stats().get_word_count_minus()
     if len(artist_word_count) != 0:
         artist_word_cloud = WordCloud().generate_from_frequencies(artist_word_count)
@@ -120,7 +127,7 @@ if __name__ == '__main__':
                     next_choice = input("Select a Word Cloud to display: ")
 
                 if next_choice == 'A':
-                    plt.imshow(rap_genius_artist.get_word_cloud_minus(), interpolation='bilinear')
+                    plt.imshow(rap_genius_artist.get_word_cloud(), interpolation='bilinear')
                     plt.title(rap_genius_artist.get_artist_name())
                     plt.axis("off")
                     plt.show()

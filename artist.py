@@ -352,7 +352,11 @@ class Song:
 
     # get the lyrics for the song from the rap genius song url
     def init_lyrics(self):
-        html = requests.get(self.get_song_url())
+        try:
+            html = requests.get(self.get_song_url())
+        except requests.exceptions.RequestException as e:
+            print(e)
+            exit()
         data = html.text
         soup = BeautifulSoup(data, "html.parser")
         lyrics_html = soup.find("div", {"class": "lyrics"})
@@ -401,7 +405,11 @@ def get_artist_albums_from_artist_url(artist_link):
     :param artist_link: rap genius link to artist
     :return: rap genius album urls found from the rap genius artist page
     """
-    html = requests.get(artist_link)
+    try:
+        html = requests.get(artist_link)
+    except requests.exceptions.RequestException as e:
+        print(e)
+        exit()
     data = html.text
     soup = BeautifulSoup(data, "html.parser")
 
@@ -420,7 +428,11 @@ def get_song_urls_from_album_url(album_link):
     :param album_link: rap genius album link
     :return: list of rap genius song links found from the album link
     """
-    html = requests.get(album_link)
+    try:
+        html = requests.get(album_link)
+    except requests.exceptions.RequestException as e:
+        print(e)
+        exit()
     data = html.text
     soup = BeautifulSoup(data, "html.parser")
 
